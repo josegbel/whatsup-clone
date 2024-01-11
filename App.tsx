@@ -76,4 +76,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "regular"
   }
+  
 });
