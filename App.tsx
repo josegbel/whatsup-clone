@@ -1,19 +1,12 @@
 import 'react-native-gesture-handler'
 import * as Font from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
-import {StatusBar} from 'expo-status-bar';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {useCallback, useEffect, useState} from "react";
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {NavigationContainer} from "@react-navigation/native";
-import {createStackNavigator} from "@react-navigation/stack";
-
-import ChatListScreen from './screens/ChatListScreen'
-import ChatSettingsScreen from "./screens/ChatSettingsScreen";
+import AppNavigator from './navigation/AppNavigator'
 
 SplashScreen.preventAutoHideAsync()
-
-const Stack = createStackNavigator()
 
 export default function App() {
 
@@ -60,14 +53,8 @@ export default function App() {
         <SafeAreaProvider
             style={styles.container}
             onLayout={onLayout}>
-            <NavigationContainer>
 
-                <Stack.Navigator>
-                    <Stack.Screen name="Home" component={ChatListScreen}/>
-                    <Stack.Screen name="ChatSettings" component={ChatSettingsScreen}/>
-                </Stack.Navigator>
-
-            </NavigationContainer>
+            <AppNavigator></AppNavigator>
         </SafeAreaProvider>
     );
 }

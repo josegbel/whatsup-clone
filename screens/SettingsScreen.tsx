@@ -1,9 +1,9 @@
 import React from 'react'
 import {View, Text, StyleSheet} from "react-native";
 
-const SettingsScreen = props => {
+const ChatSettingsScreen = props => {
     return <View style={styles.container}>
-        <Text>Settings screen</Text>
+        <Text>Chat Settings screen</Text>
     </View>
 }
 
@@ -15,4 +15,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default SettingsScreen
+export default ChatSettingsScreen
