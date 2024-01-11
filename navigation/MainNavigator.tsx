@@ -1,12 +1,12 @@
 import React from 'react'
-import {NavigationContainer} from "@react-navigation/native";
 import {createStackNavigator} from "@react-navigation/stack";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
+import {Ionicons} from "@expo/vector-icons";
+
 import ChatListScreen from "../screens/ChatListScreen";
 import SettingsScreen from "../screens/SettingsScreen";
-import {Ionicons} from "@expo/vector-icons";
 import ChatSettingsScreen from "../screens/SettingsScreen";
-
+import ChatScreen from "../screens/ChatScreen";
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -29,17 +29,17 @@ const TabNavigator = () => {
         </Tab.Navigator>
     )
 }
-
-
-const AppNavigator = props => {
-    return <NavigationContainer>
-
+const MainNavigator = props => {
+    return (
         <Stack.Navigator>
             <Stack.Screen name="Home" component={TabNavigator} options={{headerShown: false}}/>
             <Stack.Screen name="ChatSettings" component={ChatSettingsScreen}/>
+            <Stack.Screen name="ChatScreen" component={ChatScreen} options={{
+                headerTitle: '',
+                headerBackTitle: 'Back'
+            }}/>
         </Stack.Navigator>
-
-    </NavigationContainer>
+    )
 }
 
-export default AppNavigator
+export default MainNavigator
