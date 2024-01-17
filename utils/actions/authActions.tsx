@@ -5,9 +5,11 @@ import {
 } from "firebase/auth";
 import { getFirebaseApp } from "../firebaseHelper";
 import { child, getDatabase, ref, set } from "firebase/database";
-import { authenticate } from "../../store/authSlice";
+import { authenticate, logout } from "../../store/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUserData } from "./userActions";
+
+let timer;
 
 export const signUp = (firstName, lastName, email, password) => {
   return async (dispatch) => {
@@ -25,11 +27,17 @@ export const signUp = (firstName, lastName, email, password) => {
       const { accessToken, expirationTime } = result.user["stsTokenManager"];
 
       const expireDate = new Date(expirationTime);
+      const timeNow = new Date();
+      const millisecondsToExpire = expireDate.getTime() - timeNow.getTime();
 
       const userData = await createUser(firstName, lastName, email, uid);
 
       dispatch(authenticate({ userData, token: accessToken }));
       saveDataToStorage(accessToken, uid, expireDate);
+
+      timer = setTimeout(() => {
+        dispatch(userLogout());
+      }, millisecondsToExpire);
     } catch (error) {
       console.error(error);
       let message = "Something went wrong!";
@@ -40,6 +48,13 @@ export const signUp = (firstName, lastName, email, password) => {
 
       throw new Error(message);
     }
+  };
+};
+
+export const userLogout = () => {
+  return async (dispatch) => {
+    AsyncStorage.clear();
+    dispatch(logout());
   };
 };
 
@@ -54,17 +69,24 @@ export const signIn = (email, password) => {
       const { uid } = result.user;
       const { accessToken, expirationTime } = result.user["stsTokenManager"];
       const expireDate = new Date(expirationTime);
+      const timeNow = new Date();
+      const millisecondsToExpire = expireDate.getTime() - timeNow.getTime();
       const userData = await getUserData(uid);
 
       dispatch(authenticate({ userData, token: accessToken }));
       saveDataToStorage(accessToken, uid, expireDate);
+      timer = setTimeout(() => {
+        dispatch(userLogout());
+      }, millisecondsToExpire);
     } catch (error) {
-      console.error(error);
+      console.error(error.code);
       let message = "Something went wrong!";
 
       if (
         error.code === "auth/invalid-credential" ||
-        error.code === "auth/invalid-email"
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
       ) {
         message = "Invalid credentials!";
       }

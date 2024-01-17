@@ -55,8 +55,8 @@ const SignUpForm = (props) => {
         formState.inputValues.email,
         formState.inputValues.password
       );
-      dispatch(action);
       setError(undefined);
+      await dispatch(action);
     } catch (error) {
       setError(error.message);
       setIsLoading(false);
