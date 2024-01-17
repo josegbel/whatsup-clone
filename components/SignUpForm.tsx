@@ -44,9 +44,9 @@ const SignUpForm = (props) => {
     if (error) {
       Alert.alert("An error occurred!", error, [{ text: "Okay" }]);
     }
-  });
+  }, [error]);
 
-  const authHandler = async () => {
+  const authHandler = useCallback(async () => {
     try {
       setIsLoading(true);
       const action = signUp(
@@ -59,10 +59,9 @@ const SignUpForm = (props) => {
       setError(undefined);
     } catch (error) {
       setError(error.message);
-    } finally {
       setIsLoading(false);
     }
-  };
+  }, [dispatch, formState]);
 
   return (
     <>
