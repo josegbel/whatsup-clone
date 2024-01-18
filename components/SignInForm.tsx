@@ -9,16 +9,18 @@ import { signIn } from "../utils/actions/authActions";
 import { useDispatch } from "react-redux";
 import colors from "../constants/colors";
 
+const isTestMode = true;
+
 const initialState = {
   inputValues: {
-    email: "",
-    password: "",
+    email: isTestMode ? "qq@qq.com" : "",
+    password: isTestMode ? "qqqqqqqq" : "",
   },
   inputValidities: {
-    email: false,
-    password: false,
+    email: isTestMode,
+    password: isTestMode,
   },
-  formIsValid: false,
+  formIsValid: isTestMode,
 };
 
 const SignInForm = (props) => {
@@ -66,6 +68,7 @@ const SignInForm = (props) => {
         autoCapitalize="none"
         label="Email"
         icon="mail"
+        initialValue={formState.inputValues.email}
         onInputChanged={inputChangedHandler}
         errorText={formState.inputValidities.email}
         iconPack={Feather}
@@ -77,6 +80,7 @@ const SignInForm = (props) => {
         autoCapitalize="none"
         label="Password"
         icon="lock"
+        initialValue={formState.inputValues.password}
         onInputChanged={inputChangedHandler}
         errorText={formState.inputValidities.password}
         iconPack={Feather}

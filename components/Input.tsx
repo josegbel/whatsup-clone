@@ -4,8 +4,11 @@ import React from "react";
 
 const Input = (props) => {
   const onChangeText = (text) => {
+    setValue(text);
     props.onInputChanged(props.id, text);
   };
+
+  const [value, setValue] = React.useState(props.initialValue);
 
   return (
     <View style={styles.container}>
@@ -21,6 +24,7 @@ const Input = (props) => {
         <TextInput
           {...props}
           style={styles.input}
+          value={value}
           onChangeText={onChangeText}
         />
       </View>
