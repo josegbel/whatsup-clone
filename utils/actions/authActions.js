@@ -125,9 +125,11 @@ const saveDataToStorage = (token, userId, expirationDate) => {
   );
 };
 
-export const updateUserDetails = async (userId, newData) => {
-  const firstLast = `${newData.firstName} ${newData.lastName}`.toLowerCase();
-  newData.firstLast = firstLast;
+export const updateUserDetailsOnBackend = async (userId, newData) => {
+  if (newData.firstName && newData.lastName) {
+    const firstLast = `${newData.firstName} ${newData.lastName}`.toLowerCase();
+    newData.firstLast = firstLast;
+  }
 
   const dbRef = ref(getDatabase());
   const childRef = child(dbRef, `users/${userId}`);
