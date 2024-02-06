@@ -1,6 +1,6 @@
 import validate from "validate.js";
 
-export const validateString = (id: any, value: any) => {
+export const validateString = (id, value) => {
   const constraints = {
     presence: { allowEmpty: false },
   };
@@ -17,7 +17,7 @@ export const validateString = (id: any, value: any) => {
   return validationResult && validationResult[id];
 };
 
-export const validateEmail = (id: any, value: any) => {
+export const validateEmail = (id, value) => {
   const constraints = {
     presence: { allowEmpty: false },
   };
@@ -31,7 +31,7 @@ export const validateEmail = (id: any, value: any) => {
   return validationResult && validationResult[id];
 };
 
-export const validatePassword = (id: any, value: any) => {
+export const validatePassword = (id, value) => {
   const constraints = {
     presence: { allowEmpty: false },
   };
@@ -48,13 +48,7 @@ export const validatePassword = (id: any, value: any) => {
   return validationResult && validationResult[id];
 };
 
-export const validateLength = (
-  id: any,
-  value: any,
-  minLength,
-  maxLength,
-  allowEmpty
-) => {
+export const validateLength = (id, value, minLength, maxLength, allowEmpty) => {
   const constraints = {
     presence: { allowEmpty: allowEmpty },
   };

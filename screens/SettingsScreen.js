@@ -65,11 +65,11 @@ const SettingsScreen = (props) => {
   }, [dispatch, formState]);
 
   const inputChangedHandler = useCallback(
-    (inputId: string, inputValue: string) => {
+    (inputId, inputValue) => {
       const result = validateInput(inputId, inputValue);
       dispatchFormState({ inputValue, inputId, validationResult: result });
     },
-    [dispatchFormState]
+    [dispatchFormState],
   );
 
   const hasChanges = useCallback(() => {

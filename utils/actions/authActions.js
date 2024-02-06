@@ -20,7 +20,7 @@ export const signUp = (firstName, lastName, email, password) => {
       const result = await createUserWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
 
       const { uid } = result.user;
@@ -121,7 +121,7 @@ const saveDataToStorage = (token, userId, expirationDate) => {
       token,
       userId,
       expiryDate: expirationDate.toISOString(),
-    })
+    }),
   );
 };
 

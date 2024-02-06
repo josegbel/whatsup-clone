@@ -33,11 +33,11 @@ const SignUpForm = (props) => {
   const [formState, dispatchFormState] = useReducer(reducer, initialState);
 
   const inputChangedHandler = useCallback(
-    (inputId: string, inputValue: string) => {
+    (inputId, inputValue) => {
       const result = validateInput(inputId, inputValue);
       dispatchFormState({ inputValue, inputId, validationResult: result });
     },
-    [dispatchFormState]
+    [dispatchFormState],
   );
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const SignUpForm = (props) => {
         formState.inputValues.firstName,
         formState.inputValues.lastName,
         formState.inputValues.email,
-        formState.inputValues.password
+        formState.inputValues.password,
       );
       setError(undefined);
       await dispatch(action);

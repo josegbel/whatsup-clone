@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "check": "npx prettier --check .",
+    "format": "npx prettier --write ."
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
@@ -38,7 +40,8 @@
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "prettier": "3.2.5"
   },
   "private": true
 }

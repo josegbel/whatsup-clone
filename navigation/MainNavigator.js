@@ -14,10 +14,12 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   return (
-    <Tab.Navigator screenOptions={{
-      headerTitle: "",
-      headerShadowVisible: false  
-    }}>
+    <Tab.Navigator
+      screenOptions={{
+        headerTitle: "",
+        headerShadowVisible: false,
+      }}
+    >
       <Tab.Screen
         name="ChatList"
         component={ChatListScreen}
@@ -69,11 +71,8 @@ const MainNavigator = (props) => {
         />
       </Stack.Group>
 
-      <Stack.Group screenOptions={{ presentation: 'containedModal' }}>
-        <Stack.Screen
-          name="NewChat"
-          component={NewChatScreen}
-        />
+      <Stack.Group screenOptions={{ presentation: "containedModal" }}>
+        <Stack.Screen name="NewChat" component={NewChatScreen} />
       </Stack.Group>
     </Stack.Navigator>
   );

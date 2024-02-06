@@ -31,11 +31,11 @@ const SignInForm = (props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const inputChangedHandler = useCallback(
-    (inputId: string, inputValue: string) => {
+    (inputId, inputValue) => {
       const result = validateInput(inputId, inputValue);
       dispatchFormState({ inputId, inputValue, validationResult: result });
     },
-    [dispatchFormState]
+    [dispatchFormState],
   );
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const SignInForm = (props) => {
       setIsLoading(true);
       const action = signIn(
         formState.inputValues.email,
-        formState.inputValues.password
+        formState.inputValues.password,
       );
       setError(undefined);
       await dispatch(action);
