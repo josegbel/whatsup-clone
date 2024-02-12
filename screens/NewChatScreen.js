@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, TextInput, FlatList, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import CustomHeaderButton from "../components/CustomHeaderButton";
 import PageContainer from "../components/PageContainer";
@@ -7,6 +14,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import colors from "../constants/colors";
 import commonStyles from "../constants/commonStyles";
 import { searchUsers } from "../utils/actions/userActions";
+import DataItem from "../components/DataItem";
 
 const NewChatScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -37,13 +45,12 @@ const NewChatScreen = (props) => {
       setIsLoading(true);
 
       const usersResult = await searchUsers(searchText);
-      setUsers(usersResult)
+      setUsers(usersResult);
 
-      if(Object.keys(usersResult).length === 0){
-        setNoResultsFound(true)
-      }
-      else {
-        setNoResultsFound(false)
+      if (Object.keys(usersResult).length === 0) {
+        setNoResultsFound(true);
+      } else {
+        setNoResultsFound(false);
       }
 
       setIsLoading(false);
@@ -63,23 +70,29 @@ const NewChatScreen = (props) => {
         />
       </View>
 
-      {
-        isLoading &&  
+      {isLoading && (
         <View style={commonStyles.center}>
-          <ActivityIndicator size={'large'} color={colors.primary}/>
+          <ActivityIndicator size={"large"} color={colors.primary} />
         </View>
-      }
+      )}
 
-      {
-        !isLoading && !noResultsFound &&users &&
+      {!isLoading && !noResultsFound && users && (
         <FlatList
           data={Object.keys(users)}
-          renderItem={(itemData)=>{
-            const userId = itemData.item
-            return <Text>{userId}</Text>
+          renderItem={(itemData) => {
+            const userId = itemData.item;
+            const userData = users[userId];
+            console.log(userData);
+            return (
+              <DataItem
+                title={`${userData.firstName} ${userData.lastName}`}
+                subtitle={userData.about}
+                image={userData.profileImage}
+              />
+            );
           }}
         />
-      }
+      )}
 
       {!isLoading && noResultsFound && (
         <View style={commonStyles.center}>

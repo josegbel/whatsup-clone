@@ -89,8 +89,9 @@ const SettingsScreen = (props) => {
         <PageTitle text="Settings" />
 
         <ProfileImage
-          uri={userData.profilePicture}
+          uri={userData.profileImage}
           userId={userData.userId}
+          showEditButton={true}
           size={80}
         />
 

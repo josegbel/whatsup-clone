@@ -1,4 +1,13 @@
-import { child, get, getDatabase, query, ref, orderByChild, startAt, endAt } from "firebase/database";
+import {
+  child,
+  get,
+  getDatabase,
+  query,
+  ref,
+  orderByChild,
+  startAt,
+  endAt,
+} from "firebase/database";
 import { getFirebaseApp } from "../firebaseHelper";
 
 export const getUserData = async (userId) => {
