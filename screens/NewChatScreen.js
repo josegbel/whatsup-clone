@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   View,
   StyleSheet,
@@ -15,12 +16,17 @@ import colors from "../constants/colors";
 import commonStyles from "../constants/commonStyles";
 import { searchUsers } from "../utils/actions/userActions";
 import DataItem from "../components/DataItem";
+import { setStoredUsers } from "../store/usersSlice";
 
 const NewChatScreen = (props) => {
+  const dispatch = useDispatch();
+
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState();
   const [noResultsFound, setNoResultsFound] = useState(false);
   const [searchText, setSearchText] = useState("");
+
+  const userData = useSelector((state) => state.auth.userData);
 
   useEffect(() => {
     props.navigation.setOptions({
@@ -45,12 +51,14 @@ const NewChatScreen = (props) => {
       setIsLoading(true);
 
       const usersResult = await searchUsers(searchText);
+      delete usersResult[userData.userId];
       setUsers(usersResult);
 
       if (Object.keys(usersResult).length === 0) {
         setNoResultsFound(true);
       } else {
         setNoResultsFound(false);
+        dispatch(setStoredUsers({ newUsers: usersResult }));
       }
 
       setIsLoading(false);
@@ -58,6 +66,12 @@ const NewChatScreen = (props) => {
 
     return () => clearTimeout(delaySearch);
   }, [searchText]);
+
+  const userPressed = (userId) => {
+    props.navigation.navigate("ChatList", {
+      selectedUserId: userId,
+    });
+  };
 
   return (
     <PageContainer>
@@ -82,12 +96,13 @@ const NewChatScreen = (props) => {
           renderItem={(itemData) => {
             const userId = itemData.item;
             const userData = users[userId];
-            console.log(userData);
+
             return (
               <DataItem
                 title={`${userData.firstName} ${userData.lastName}`}
                 subtitle={userData.about}
                 image={userData.profileImage}
+                onPress={() => userPressed(userId)}
               />
             );
           }}
