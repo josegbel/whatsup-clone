@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, TextInput } from "react-native";
+import { View, StyleSheet, Text, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import CustomHeaderButton from "../components/CustomHeaderButton";
 import PageContainer from "../components/PageContainer";
 import { FontAwesome } from "@expo/vector-icons";
 import colors from "../constants/colors";
 import commonStyles from "../constants/commonStyles";
+import { searchUsers } from "../utils/actions/userActions";
 
 const NewChatScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,13 +28,23 @@ const NewChatScreen = (props) => {
   }, []);
 
   useEffect(() => {
-    const delaySearch = setTimeout(() => {
+    const delaySearch = setTimeout(async () => {
       if (!searchText || searchText === "") {
         setUsers();
         setNoResultsFound(false);
         return;
       }
       setIsLoading(true);
+
+      const usersResult = await searchUsers(searchText);
+      setUsers(usersResult)
+
+      if(Object.keys(usersResult).length === 0){
+        setNoResultsFound(true)
+      }
+      else {
+        setNoResultsFound(false)
+      }
 
       setIsLoading(false);
     }, 500);
@@ -51,6 +62,24 @@ const NewChatScreen = (props) => {
           onChangeText={(text) => setSearchText(text)}
         />
       </View>
+
+      {
+        isLoading &&  
+        <View style={commonStyles.center}>
+          <ActivityIndicator size={'large'} color={colors.primary}/>
+        </View>
+      }
+
+      {
+        !isLoading && !noResultsFound &&users &&
+        <FlatList
+          data={Object.keys(users)}
+          renderItem={(itemData)=>{
+            const userId = itemData.item
+            return <Text>{userId}</Text>
+          }}
+        />
+      }
 
       {!isLoading && noResultsFound && (
         <View style={commonStyles.center}>

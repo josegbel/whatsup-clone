@@ -1,4 +1,4 @@
-import { child, get, getDatabase, query, ref } from "firebase/database";
+import { child, get, getDatabase, query, ref, orderByChild, startAt, endAt } from "firebase/database";
 import { getFirebaseApp } from "../firebaseHelper";
 
 export const getUserData = async (userId) => {
@@ -35,7 +35,7 @@ export const searchUsers = async (queryText) => {
     if (snapshot.exists()) {
       return snapshot.val();
     } else {
-      console.log("No data available");
+      return {};
     }
   } catch (error) {
     console.error(error);
