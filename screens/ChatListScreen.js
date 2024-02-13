@@ -6,19 +6,24 @@ import { useSelector } from "react-redux";
 import DataItem from "../components/DataItem";
 import PageContainer from "../components/PageContainer";
 import PageTitle from "../components/PageTitle";
+import { createSelector } from "reselect";
 
 const ChatListScreen = (props) => {
   const selectedUser = props.route?.params?.selectedUserId;
   const userData = useSelector((state) => state.auth.userData);
   const storedUsers = useSelector((state) => state.users.storedUsers);
-  const userChats = useSelector((state) => {
-    const chatsData = state.chats.chatsData;
-    return Object.values(chatsData).sort((a, b) => {
-      return new Date(b.updatedAt) - new Date(a.updatedAt);
-    });
-  });
 
-  console.log(storedUsers);
+  // memoized selector as we are sorting the chats
+  const chatsDataSelector = (state) => state.chats.chatsData;
+  const sortedChatsSelector = createSelector(
+    [chatsDataSelector],
+    (chatsData) => {
+      return Object.values(chatsData).sort(
+        (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+      );
+    },
+  );
+  const userChats = useSelector(sortedChatsSelector);
 
   useEffect(() => {
     props.navigation.setOptions({
@@ -67,8 +72,7 @@ const ChatListScreen = (props) => {
           if (!otherUserData) return;
 
           const title = `${otherUserData.firstName} ${otherUserData.lastName}`;
-          // const subtitle = chatData.lastMessage
-          const subtitle = "This will be a msg";
+          const subtitle = chatData.latestMessageText || "New chat";
           const image = otherUserData.profileImage;
 
           return (
