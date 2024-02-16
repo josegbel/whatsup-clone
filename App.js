@@ -9,6 +9,7 @@ import React from "react";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MenuProvider } from "react-native-popup-menu";
 
 SplashScreen.preventAutoHideAsync();
 // AsyncStorage.clear();
@@ -56,7 +57,9 @@ export default function App() {
   return (
     <Provider store={store} children={undefined}>
       <SafeAreaProvider style={styles.container} onLayout={onLayout}>
-        <AppNavigator></AppNavigator>
+        <MenuProvider>
+          <AppNavigator />
+        </MenuProvider>
       </SafeAreaProvider>
     </Provider>
   );

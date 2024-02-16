@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { getFirebaseApp } from "./firebaseHelper";
-import { v4 as uuidv4 } from "uuid";
+import uuid from 'react-native-uuid';
 import "react-native-get-random-values";
 import {
   getDownloadURL,
@@ -9,6 +9,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
+import { format } from "validate.js";
 
 export const launchImagePicker = async () => {
   await checkMediaPermission();
@@ -25,7 +26,7 @@ export const launchImagePicker = async () => {
   }
 };
 
-export const uploadImage = async (uri) => {
+export const uploadImageAsync = async (uri, isChatImage = false) => {
   const app = getFirebaseApp();
 
   const blob = await new Promise((resolve, reject) => {
@@ -44,12 +45,11 @@ export const uploadImage = async (uri) => {
     xhr.send();
   });
 
-  const pathFolder = "profilePics";
-  const storageRef = ref(getStorage(app), `${pathFolder}/${uuidv4()}`);
+  const pathFolder = isChatImage ? 'chatImages' : "profilePics";
+  const storageRef = ref(getStorage(app), `${pathFolder}/${uuid.v4()}`);
   await uploadBytesResumable(storageRef, blob);
-
   const downloadURL = await getDownloadURL(storageRef);
-
+  
   blob.close();
 
   return downloadURL;

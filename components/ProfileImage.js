@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import colors from "../constants/colors";
 import { FontAwesome } from "@expo/vector-icons";
-import { launchImagePicker, uploadImage } from "../utils/imagePickerHelper";
+import { launchImagePicker, uploadImageAsync } from "../utils/imagePickerHelper";
 import { updateUserDetailsOnBackend } from "../utils/actions/authActions";
 import { useDispatch } from "react-redux";
 import { updateSignedInUserData } from "../store/authSlice";
@@ -34,7 +34,7 @@ const ProfileImage = (props) => {
       if (!tempUri) return;
 
       setIsLoading(true);
-      const uploadUrl = await uploadImage(tempUri);
+      const uploadUrl = await uploadImageAsync(tempUri);
       if (!uploadUrl) throw new Error("Error uploading image");
 
       const newData = { profileImage: uploadUrl };
