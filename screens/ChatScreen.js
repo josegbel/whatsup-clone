@@ -33,112 +33,108 @@ const ChatScreen = (props) => {
   const [errorBannerText, setErrorBannerText] = useState("");
   const [replyingTo, setReplyingTo] = useState();
   const [tempImageUri, setTempImageUri] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [isImageUploading, setIsImageUploading] = useState(false);
 
-  const userData = useSelector((state) => state.auth.userData);
-  const storedUsers = useSelector((state) => state.users.storedUsers);
-  const storedChats = useSelector((state) => state.chats.chatsData);
+  const userData = useSelector(state => state.auth.userData);
+  const storedUsers = useSelector(state => state.users.storedUsers);
+  const storedChats = useSelector(state => state.chats.chatsData);
+  const storedMessages = useSelector(state => {
+    if (!chatId) return [];
 
-  const messagesDataSelector = (state) => state.messages.messagesData;
-  const extractedMessagesSelector = createSelector(
-    [messagesDataSelector],
-    (messagesData) => {
-      if (!chatId) return [];
+    const chatMessagesData = state.messages.messagesData[chatId];
 
-      const chatMessagesData = messagesData[chatId];
-      if (!chatMessagesData) return [];
+    if (!chatMessagesData) return [];
 
-      const messageList = [];
-      for (const key in chatMessagesData) {
-        const message = chatMessagesData[key];
-        messageList.push({
-          key,
-          ...message
-        });
-      }
+    const messageList = [];
+    for (const key in chatMessagesData) {
+      const message = chatMessagesData[key];
 
-      return messageList;
-    },
-  );
-  const storedMessages = useSelector(extractedMessagesSelector);
+      messageList.push({
+        key,
+        ...message
+      });
+    }
 
-  const chatData =
-    (chatId && storedChats[chatId]) || props.route?.params?.newChatData;
+    return messageList;
+  });
+
+  const chatData = (chatId && storedChats[chatId]) || props.route?.params?.newChatData;
 
   const getChatTitleFromName = () => {
-    const otherUserId = chatUsers.find((uid) => uid !== userData.userId);
+    const otherUserId = chatUsers.find(uid => uid !== userData.userId);
     const otherUserData = storedUsers[otherUserId];
 
-    return (
-      otherUserData && `${otherUserData.firstName} ${otherUserData.lastName}`
-    );
-  };
+    return otherUserData && `${otherUserData.firstName} ${otherUserData.lastName}`;
+  }
 
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: getChatTitleFromName(),
-    });
-    setChatUsers(chatData.users);
-  }, [chatUsers]);
-
-  const createChatIfNotExists = useCallback(async () => {
-    let id = chatId;
-    if (!id) {
-      // No chat Id. Create the chat
-      id = await createChat(userData.userId, props.route.params.newChatData);
-      setChatId(id);
-    }
-    return id;
-  }, [chatId]);
+      headerTitle: getChatTitleFromName()
+    })
+    setChatUsers(chatData.users)
+  }, [chatUsers])
 
   const sendMessage = useCallback(async () => {
-    try {
-      id = createChatIfNotExists();
 
-      await sendTextMessage(id, userData.userId, messageText, replyingTo?.key);
+    try {
+      let id = chatId;
+      if (!id) {
+        // No chat Id. Create the chat
+        id = await createChat(userData.userId, props.route.params.newChatData);
+        setChatId(id);
+      }
+
+      await sendTextMessage(id, userData.userId, messageText, replyingTo && replyingTo.key);
 
       setMessageText("");
       setReplyingTo(null);
     } catch (error) {
-      setErrorBannerText("Message failed to send. Please try again.");
-      setTimeout(() => {
-        setErrorBannerText("");
-      }, 5000);
+      console.log(error);
+      setErrorBannerText("Message failed to send");
+      setTimeout(() => setErrorBannerText(""), 5000);
     }
   }, [messageText, chatId]);
 
+
   const pickImage = useCallback(async () => {
     try {
-      const tempUri = await launchImagePicker()
-      if(!tempUri) return;
+      const tempUri = await launchImagePicker();
+      if (!tempUri) return;
 
       setTempImageUri(tempUri);
     } catch (error) {
-      setErrorBannerText("Image failed to send. Please try again.");
-      setTimeout(() => {
-        setErrorBannerText("");
-      }, 5000);
+      console.log(error);
     }
   }, [tempImageUri]);
 
   const uploadImage = useCallback(async () => {
-    const id = createChatIfNotExists();
-
+    setIsLoading(true);
     setIsImageUploading(true);
     try {
+
+      let id = chatId;
+      if (!id) {
+        // No chat Id. Create the chat
+        id = await createChat(userData.userId, props.route.params.newChatData);
+        setChatId(id);
+      }
+
       const uploadUrl = await uploadImageAsync(tempImageUri, true);
+      setIsLoading(false);
       setIsImageUploading(false);
-      await sendImage(id, userData.userId, uploadUrl, replyingTo?.key);
+
+      await sendImage(id, userData.userId, uploadUrl, replyingTo && replyingTo.key)
       setReplyingTo(null);
-      setTempImageUri("");
+      
+      setTimeout(() => setTempImageUri(""), 500);
+      
     } catch (error) {
-      setErrorBannerText("Image failed to send. Please try again.");
-      setTimeout(() => {
-        setErrorBannerText("");
-      }, 5000);
+      console.log(error);
+      setIsLoading(false);
       setIsImageUploading(false);
     }
-  }, [tempImageUri, isImageUploading, chatId]);
+  }, [isLoading, isImageUploading, tempImageUri, chatId])
 
   return (
     <SafeAreaView edges={["right", "left", "bottom"]} style={styles.container}>

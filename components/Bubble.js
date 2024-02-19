@@ -36,13 +36,8 @@ return hours + ":" + minutes + " " + ampm;
 const Bubble = (props) => {
   const { text, type, messageId, userId, chatId, date, setReply, replyingTo, name, imageUrl } = props;
 
-  const selectStoredUsers = (state) => state.users.storedUsers;
-  const storedUsers = useSelector((state) => selectStoredUsers(state));
-  const memoizedStoredUsers = useMemo(() => storedUsers, [storedUsers]);
-
-  const selectStarredMessages = (state, chatId) => state.messages.starredMessages[chatId] ?? {};
-  const starredMessages = useSelector((state) => selectStarredMessages(state, chatId));
-  const memoizedStarredMessages = useMemo(() => starredMessages, [starredMessages]);
+  const storedUsers = useSelector(state => state.users.storedUsers);
+  const starredMessages = useSelector(state => state.messages.starredMessages[chatId] ?? {});
 
   const bubbleStyle = { ...styles.bubble };
   const textStyle = { ...styles.text };
@@ -51,7 +46,7 @@ const Bubble = (props) => {
   const menuRef = useRef(null)
   const id = useRef(uuid.v4())
 
-  const replyingToUser = replyingTo && memoizedStoredUsers[replyingTo?.sentBy]
+  const replyingToUser = replyingTo && storedUsers[replyingTo.sentBy]
 
   let Container = View;
   let isUserMessage = false
@@ -101,7 +96,7 @@ const Bubble = (props) => {
     await Clipboard.setStringAsync(text);
   }
 
-  const isStarred = isUserMessage && memoizedStarredMessages[messageId] !== undefined
+  const isStarred = isUserMessage && starredMessages[messageId] !== undefined
 
   return (
     <View style={wrapperStyle}>
