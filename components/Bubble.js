@@ -123,6 +123,7 @@ const Bubble = (props) => {
 
   return (
     <View style={wrapperStyle}>
+      
       <Container
         style={{ width: "100%" }}
         onLongPress={() =>
