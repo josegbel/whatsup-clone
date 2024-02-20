@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { FlatList, Text, StyleSheet } from "react-native";
+import {
+  FlatList,
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
 import CustomHeaderButton from "../components/CustomHeaderButton";
 import { useSelector } from "react-redux";
@@ -7,6 +13,7 @@ import DataItem from "../components/DataItem";
 import PageContainer from "../components/PageContainer";
 import PageTitle from "../components/PageTitle";
 import { createSelector } from "reselect";
+import colors from "../constants/colors";
 
 const ChatListScreen = (props) => {
   const selectedUser = props.route?.params?.selectedUserId;
@@ -58,11 +65,22 @@ const ChatListScreen = (props) => {
   return (
     <PageContainer>
       <PageTitle text="Chats" />
+
+      <View>
+        <TouchableOpacity
+          onPress={() =>
+            props.navigation.navigate("NewChat", { isGroupChat: true })
+          }
+        >
+          <Text style={styles.newGroupText}>New Group</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={userChats}
         renderItem={(itemData) => {
           const chatData = itemData.item;
           const chatId = chatData.key;
+          console.log("chatId passed from ChatListScreen: ", chatId);
 
           const otherUserId = chatData.users.find(
             (uid) => uid !== userData.userId,
@@ -96,6 +114,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  newGroupText: {
+    color: colors.blue,
+    fontSize: 17,
+    marginBottom: 5,
   },
 });
 

@@ -156,7 +156,10 @@ const MainNavigator = (props) => {
       }
     });
 
-    const userStarredMessagesRef = child(dbRef,`userStarredMessages/${userData.userId}`);
+    const userStarredMessagesRef = child(
+      dbRef,
+      `userStarredMessages/${userData.userId}`,
+    );
     refs.push(userStarredMessagesRef);
     onValue(userStarredMessagesRef, (querySnapshot) => {
       const starredMessages = querySnapshot.val() ?? {};

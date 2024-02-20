@@ -1,15 +1,25 @@
 import React, { useRef, useMemo } from "react";
-import { StyleSheet, View, Text, TouchableWithoutFeedback, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableWithoutFeedback,
+  Image,
+} from "react-native";
 import colors from "../constants/colors";
-import { Menu, MenuOption, MenuOptions, MenuTrigger } from "react-native-popup-menu";
-import uuid from 'react-native-uuid';
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import uuid from "react-native-uuid";
 import * as Clipboard from "expo-clipboard";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { starMessage } from "../utils/actions/chatActions";
 import { useSelector } from "react-redux";
 
-const MenuItem = props => {
-
+const MenuItem = (props) => {
   const Icon = props.iconPack ?? Feather;
 
   return (
@@ -19,8 +29,8 @@ const MenuItem = props => {
         <Icon name={props.icon} size={18} color={colors.darkGrey} />
       </View>
     </MenuOption>
-  )
-}
+  );
+};
 
 const formatAmPm = (dateString) => {
   const date = new Date(dateString);
@@ -30,26 +40,39 @@ const formatAmPm = (dateString) => {
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? "0" + minutes : minutes;
-return hours + ":" + minutes + " " + ampm;
-}
+  return hours + ":" + minutes + " " + ampm;
+};
 
 const Bubble = (props) => {
-  const { text, type, messageId, userId, chatId, date, setReply, replyingTo, name, imageUrl } = props;
+  const {
+    text,
+    type,
+    messageId,
+    userId,
+    chatId,
+    date,
+    setReply,
+    replyingTo,
+    name,
+    imageUrl,
+  } = props;
 
-  const storedUsers = useSelector(state => state.users.storedUsers);
-  const starredMessages = useSelector(state => state.messages.starredMessages[chatId] ?? {});
+  const storedUsers = useSelector((state) => state.users.storedUsers);
+  const starredMessages = useSelector(
+    (state) => state.messages.starredMessages[chatId] ?? {},
+  );
 
   const bubbleStyle = { ...styles.bubble };
   const textStyle = { ...styles.text };
   const wrapperStyle = { ...styles.wrapper };
 
-  const menuRef = useRef(null)
-  const id = useRef(uuid.v4())
+  const menuRef = useRef(null);
+  const id = useRef(uuid.v4());
 
-  const replyingToUser = replyingTo && storedUsers[replyingTo.sentBy]
+  const replyingToUser = replyingTo && storedUsers[replyingTo.sentBy];
 
   let Container = View;
-  let isUserMessage = false
+  let isUserMessage = false;
 
   switch (type) {
     case "system":
@@ -69,23 +92,23 @@ const Bubble = (props) => {
       bubbleStyle.backgroundColor = "#E7FED6";
       bubbleStyle.marginTop = 5;
       bubbleStyle.maxWidth = "80%";
-      Container = TouchableWithoutFeedback
-      isUserMessage = true
+      Container = TouchableWithoutFeedback;
+      isUserMessage = true;
       break;
     case "received":
       wrapperStyle.justifyContent = "flex-start";
       bubbleStyle.backgroundColor = "white";
       bubbleStyle.marginTop = 5;
       bubbleStyle.maxWidth = "80%";
-      Container = TouchableWithoutFeedback
-      isUserMessage = true
+      Container = TouchableWithoutFeedback;
+      isUserMessage = true;
       break;
     case "reply":
       bubbleStyle.backgroundColor = "#00000009";
-      bubbleStyle.borderWidth = 0,
-      bubbleStyle.borderLeftWidth = 4,
-      bubbleStyle.borderLeftColor = colors.blue,
-      bubbleStyle.padding = 10;
+      (bubbleStyle.borderWidth = 0),
+        (bubbleStyle.borderLeftWidth = 4),
+        (bubbleStyle.borderLeftColor = colors.blue),
+        (bubbleStyle.padding = 10);
       bubbleStyle.marginBottom = 5;
       break;
     default:
@@ -94,19 +117,20 @@ const Bubble = (props) => {
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(text);
-  }
+  };
 
-  const isStarred = isUserMessage && starredMessages[messageId] !== undefined
+  const isStarred = isUserMessage && starredMessages[messageId] !== undefined;
 
   return (
     <View style={wrapperStyle}>
-      <Container 
-        style={{width: '100%'}}
-        onLongPress={()=> menuRef.current.props.ctx.menuActions.openMenu(id.current)}
+      <Container
+        style={{ width: "100%" }}
+        onLongPress={() =>
+          menuRef.current.props.ctx.menuActions.openMenu(id.current)
+        }
       >
         <View style={bubbleStyle}>
-          {
-            replyingTo && 
+          {replyingTo && (
             <Bubble
               text={replyingTo.text}
               type="reply"
@@ -115,36 +139,57 @@ const Bubble = (props) => {
               userId={replyingTo.sentBy}
               chatId={chatId}
             />
-          }
-          { type === 'reply' &&
-            <Text style={styles.name}>{name}</Text>
-          }
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          {
-            imageUrl && 
-            <Image
-              source={{uri: imageUrl}}
-              style={{width: 200, height: 200}}
-            />
-          }
-            {
-              !imageUrl && <Text style={textStyle}>{text}</Text>
-            }
-            { date &&
-            <View style={styles.timeContainer}>
-              {isStarred && <FontAwesome name="star" size={18} color={colors.grey} style={{marginRight:5}}/>}
-              <Text style={styles.time}>{formatAmPm(date)}</Text>
-            </View>
-            }
+          )}
+          {type === "reply" && <Text style={styles.name}>{name}</Text>}
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            {imageUrl && (
+              <Image
+                source={{ uri: imageUrl }}
+                style={{ width: 200, height: 200 }}
+              />
+            )}
+            {!imageUrl && <Text style={textStyle}>{text}</Text>}
+            {date && (
+              <View style={styles.timeContainer}>
+                {isStarred && (
+                  <FontAwesome
+                    name="star"
+                    size={18}
+                    color={colors.grey}
+                    style={{ marginRight: 5 }}
+                  />
+                )}
+                <Text style={styles.time}>{formatAmPm(date)}</Text>
+              </View>
+            )}
           </View>
 
           <Menu ref={menuRef} name={id.current}>
             <MenuTrigger />
             <MenuOptions>
-              <MenuItem onSelect={()=>copyToClipboard()} text="Copy" icon={'copy'} />
-              <MenuItem onSelect={()=>starMessage(messageId, chatId, userId)} text={`${isStarred ? 'Unstar' : 'Star'} message`}  icon={isStarred ? 'star' : 'star-o'} iconPack={FontAwesome} />
-              <MenuItem onSelect={setReply} text={"Reply"}  icon={'arrow-left-circle'} />
-              <MenuItem onSelect={() => console.log('Delete')} text="Delete"  icon={'delete'} />
+              <MenuItem
+                onSelect={() => copyToClipboard()}
+                text="Copy"
+                icon={"copy"}
+              />
+              <MenuItem
+                onSelect={() => starMessage(messageId, chatId, userId)}
+                text={`${isStarred ? "Unstar" : "Star"} message`}
+                icon={isStarred ? "star" : "star-o"}
+                iconPack={FontAwesome}
+              />
+              <MenuItem
+                onSelect={setReply}
+                text={"Reply"}
+                icon={"arrow-left-circle"}
+              />
+              <MenuItem
+                onSelect={() => console.log("Delete")}
+                text="Delete"
+                icon={"delete"}
+              />
             </MenuOptions>
           </Menu>
         </View>
@@ -187,7 +232,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     justifyContent: "flex-end",
     alignItems: "flex-end",
-    
   },
   menuItemText: {
     flex: 1,
@@ -195,12 +239,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 0.3,
   },
-  time: { 
-    fontFamily: "regular", 
-    fontSize: 12, 
-    color: colors.grey, 
+  time: {
+    fontFamily: "regular",
+    fontSize: 12,
+    color: colors.grey,
     letterSpacing: 0.3,
-  }
+  },
 });
 
 export default Bubble;

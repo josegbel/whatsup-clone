@@ -15,7 +15,8 @@ const messagesSlice = createSlice({
     },
     addStarredMessages: (state, action) => {
       const { starredMessagesData } = action.payload;
-      state.starredMessages[starredMessagesData.messageId] = starredMessagesData;
+      state.starredMessages[starredMessagesData.messageId] =
+        starredMessagesData;
     },
     removeStarredMessages: (state, action) => {
       const { messageId } = action.payload;
@@ -28,5 +29,10 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { setChatMessages, setStarredMessages, addStarredMessages, removeStarredMessages } = messagesSlice.actions;
+export const {
+  setChatMessages,
+  setStarredMessages,
+  addStarredMessages,
+  removeStarredMessages,
+} = messagesSlice.actions;
 export default messagesSlice.reducer;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useRef, useCallback, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -17,10 +17,13 @@ import colors from "../constants/colors";
 import { useSelector } from "react-redux";
 import PageContainer from "../components/PageContainer";
 import Bubble from "../components/Bubble";
-import { createChat, sendImage, sendTextMessage } from "../utils/actions/chatActions";
-import { createSelector } from "reselect";
+import {
+  createChat,
+  sendImage,
+  sendTextMessage,
+} from "../utils/actions/chatActions";
 import ReplyTo from "../components/ReplyTo";
-import { launchImagePicker } from "../utils/imagePickerHelper";
+import { launchImagePicker, openCamera } from "../utils/imagePickerHelper";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { uploadImageAsync } from "../utils/imagePickerHelper";
 import { set } from "firebase/database";
@@ -36,10 +39,12 @@ const ChatScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImageUploading, setIsImageUploading] = useState(false);
 
-  const userData = useSelector(state => state.auth.userData);
-  const storedUsers = useSelector(state => state.users.storedUsers);
-  const storedChats = useSelector(state => state.chats.chatsData);
-  const storedMessages = useSelector(state => {
+  const flatList = useRef();
+
+  const userData = useSelector((state) => state.auth.userData);
+  const storedUsers = useSelector((state) => state.users.storedUsers);
+  const storedChats = useSelector((state) => state.chats.chatsData);
+  const storedMessages = useSelector((state) => {
     if (!chatId) return [];
 
     const chatMessagesData = state.messages.messagesData[chatId];
@@ -52,31 +57,33 @@ const ChatScreen = (props) => {
 
       messageList.push({
         key,
-        ...message
+        ...message,
       });
     }
 
     return messageList;
   });
 
-  const chatData = (chatId && storedChats[chatId]) || props.route?.params?.newChatData;
+  const chatData =
+    (chatId && storedChats[chatId]) || props.route?.params?.newChatData;
 
   const getChatTitleFromName = () => {
-    const otherUserId = chatUsers.find(uid => uid !== userData.userId);
+    const otherUserId = chatUsers.find((uid) => uid !== userData.userId);
     const otherUserData = storedUsers[otherUserId];
 
-    return otherUserData && `${otherUserData.firstName} ${otherUserData.lastName}`;
-  }
+    return (
+      otherUserData && `${otherUserData.firstName} ${otherUserData.lastName}`
+    );
+  };
 
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: getChatTitleFromName()
-    })
-    setChatUsers(chatData.users)
-  }, [chatUsers])
+      headerTitle: getChatTitleFromName(),
+    });
+    setChatUsers(chatData.users);
+  }, [chatUsers]);
 
   const sendMessage = useCallback(async () => {
-
     try {
       let id = chatId;
       if (!id) {
@@ -85,7 +92,12 @@ const ChatScreen = (props) => {
         setChatId(id);
       }
 
-      await sendTextMessage(id, userData.userId, messageText, replyingTo && replyingTo.key);
+      await sendTextMessage(
+        id,
+        userData.userId,
+        messageText,
+        replyingTo && replyingTo.key,
+      );
 
       setMessageText("");
       setReplyingTo(null);
@@ -95,7 +107,6 @@ const ChatScreen = (props) => {
       setTimeout(() => setErrorBannerText(""), 5000);
     }
   }, [messageText, chatId]);
-
 
   const pickImage = useCallback(async () => {
     try {
@@ -108,11 +119,21 @@ const ChatScreen = (props) => {
     }
   }, [tempImageUri]);
 
+  const takePhoto = useCallback(async () => {
+    try {
+      const tempUri = await openCamera();
+      if (!tempUri) return;
+
+      setTempImageUri(tempUri);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [tempImageUri]);
+
   const uploadImage = useCallback(async () => {
     setIsLoading(true);
     setIsImageUploading(true);
     try {
-
       let id = chatId;
       if (!id) {
         // No chat Id. Create the chat
@@ -124,17 +145,21 @@ const ChatScreen = (props) => {
       setIsLoading(false);
       setIsImageUploading(false);
 
-      await sendImage(id, userData.userId, uploadUrl, replyingTo && replyingTo.key)
+      await sendImage(
+        id,
+        userData.userId,
+        uploadUrl,
+        replyingTo && replyingTo.key,
+      );
       setReplyingTo(null);
-      
+
       setTimeout(() => setTempImageUri(""), 500);
-      
     } catch (error) {
       console.log(error);
       setIsLoading(false);
       setIsImageUploading(false);
     }
-  }, [isLoading, isImageUploading, tempImageUri, chatId])
+  }, [isLoading, isImageUploading, tempImageUri, chatId]);
 
   return (
     <SafeAreaView edges={["right", "left", "bottom"]} style={styles.container}>
@@ -159,6 +184,13 @@ const ChatScreen = (props) => {
             {chatId && (
               <FlatList
                 data={storedMessages}
+                ref={(ref) => (flatList.current = ref)}
+                onContentSizeChange={() =>
+                  flatList.current.scrollToEnd({ animated: true })
+                }
+                onLayout={() =>
+                  flatList.current.scrollToEnd({ animated: false })
+                }
                 renderItem={(itemData) => {
                   const message = itemData.item;
                   return (
@@ -173,7 +205,10 @@ const ChatScreen = (props) => {
                       chatId={chatId}
                       date={message.sentAt}
                       setReply={() => setReplyingTo(message)}
-                      replyingTo={message.replyTo && storedMessages.find(m => m.key === message.replyTo)}
+                      replyingTo={
+                        message.replyTo &&
+                        storedMessages.find((m) => m.key === message.replyTo)
+                      }
                       imageUrl={message.imageUrl}
                     />
                   );
@@ -182,15 +217,13 @@ const ChatScreen = (props) => {
             )}
           </PageContainer>
 
-          {
-            replyingTo && (
-              <ReplyTo
-                text={replyingTo.text}
-                user={storedUsers[replyingTo.sentBy]}
-                onCancel={() => setReplyingTo(null)}
-              />
-            )
-          }
+          {replyingTo && (
+            <ReplyTo
+              text={replyingTo.text}
+              user={storedUsers[replyingTo.sentBy]}
+              onCancel={() => setReplyingTo(null)}
+            />
+          )}
         </ImageBackground>
 
         <View style={styles.inputContainer}>
@@ -209,10 +242,7 @@ const ChatScreen = (props) => {
           />
 
           {messageText === "" && (
-            <TouchableOpacity
-              style={styles.mediaButton}
-              onPress={() => console.log("Pressed!")}
-            >
+            <TouchableOpacity style={styles.mediaButton} onPress={takePhoto}>
               <Feather name="camera" size={24} color={colors.blue} />
             </TouchableOpacity>
           )}
@@ -226,9 +256,9 @@ const ChatScreen = (props) => {
             </TouchableOpacity>
           )}
 
-          <AwesomeAlert 
+          <AwesomeAlert
             show={tempImageUri !== ""}
-            title='Send Image'
+            title="Send Image"
             closeOnTouchOutside={true}
             closeOnHardwareBackPress={true}
             showCancelButton={true}
@@ -239,23 +269,22 @@ const ChatScreen = (props) => {
             cancelButtonColor={colors.red}
             titleStyle={styles.popupTitle}
             onCancelPressed={() => {
-              setTempImageUri("")
-              setIsImageUploading(false)
+              setTempImageUri("");
+              setIsImageUploading(false);
             }}
             onConfirmPressed={uploadImage}
             onDismiss={() => setTempImageUri("")}
             customView={
               <View>
-                {
-                  isImageUploading &&
+                {isImageUploading && (
                   <ActivityIndicator size="small" color={colors.primary} />
-                }
-                { tempImageUri !== "" && !isImageUploading &&
+                )}
+                {tempImageUri !== "" && !isImageUploading && (
                   <Image
                     source={{ uri: tempImageUri }}
                     style={{ width: 200, height: 200 }}
                   />
-                }
+                )}
               </View>
             }
           />

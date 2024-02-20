@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { getFirebaseApp } from "./firebaseHelper";
-import uuid from 'react-native-uuid';
+import uuid from "react-native-uuid";
 import "react-native-get-random-values";
 import {
   getDownloadURL,
@@ -15,6 +15,27 @@ export const launchImagePicker = async () => {
   await checkMediaPermission();
 
   const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 1,
+  });
+
+  if (!result.canceled) {
+    return result.assets[0].uri;
+  }
+};
+
+export const openCamera = async () => {
+  const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+  if (permissionResult.granted === false) {
+    return Promise.reject(
+      new Error("Permission to access camera is required!"),
+    );
+  }
+
+  const result = await ImagePicker.launchCameraAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [1, 1],
@@ -45,11 +66,11 @@ export const uploadImageAsync = async (uri, isChatImage = false) => {
     xhr.send();
   });
 
-  const pathFolder = isChatImage ? 'chatImages' : "profilePics";
+  const pathFolder = isChatImage ? "chatImages" : "profilePics";
   const storageRef = ref(getStorage(app), `${pathFolder}/${uuid.v4()}`);
   await uploadBytesResumable(storageRef, blob);
   const downloadURL = await getDownloadURL(storageRef);
-  
+
   blob.close();
 
   return downloadURL;
