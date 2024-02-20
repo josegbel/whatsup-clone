@@ -17,6 +17,9 @@ import colors from "../constants/colors";
 
 const ChatListScreen = (props) => {
   const selectedUser = props.route?.params?.selectedUserId;
+  const selectedUserList = props.route?.params?.selectedUsers;
+  const chatName = props.route?.params?.chatName;
+
   const userData = useSelector((state) => state.auth.userData);
   const storedUsers = useSelector((state) => state.users.storedUsers);
 
@@ -40,7 +43,9 @@ const ChatListScreen = (props) => {
             <Item
               title="New chat"
               iconName="create-outline"
-              onPress={() => props.navigation.navigate("NewChat")}
+              onPress={() =>
+                props.navigation.navigate("NewChat", { isGroupChat: false })
+              }
             />
           </HeaderButtons>
         );
@@ -49,15 +54,38 @@ const ChatListScreen = (props) => {
   }, []);
 
   useEffect(() => {
-    if (!selectedUser) {
+    if (!selectedUser && !selectedUserList) {
       return;
     }
 
-    const chatUsers = [selectedUser, userData.userId];
+    let chatData;
+    let navigationProps;
 
-    const navigationProps = {
-      newChatData: { users: chatUsers },
-    };
+    if (selectedUser) {
+      chatData = userChats.find(
+        (cd) => !cd.isGroupChat && cd.users.includes(selectedUser),
+      );
+    }
+
+    if (chatData) {
+      navigationProps = { chatId: chatData.key };
+    } else {
+      const chatUsers = selectedUserList || [selectedUser];
+      if (!chatUsers.includes(userData.userId)) {
+        chatUsers.push(userData.userId);
+      }
+
+      navigationProps = {
+        newChatData: {
+          users: chatUsers,
+          isGroupChat: selectedUserList !== undefined,
+        },
+      };
+    }
+
+    if (chatName) {
+      navigationProps.newChatData.chatName = chatName;
+    }
 
     props.navigation.navigate("ChatScreen", navigationProps);
   }, [props.route?.params]);
@@ -80,6 +108,12 @@ const ChatListScreen = (props) => {
         renderItem={(itemData) => {
           const chatData = itemData.item;
           const chatId = chatData.key;
+          const isGroupChat = chatData.isGroupChat;
+
+          let title = "";
+          const subtitle = chatData.latestMessageText || "New chat";
+          let image = "";
+
           console.log("chatId passed from ChatListScreen: ", chatId);
 
           const otherUserId = chatData.users.find(
@@ -89,9 +123,12 @@ const ChatListScreen = (props) => {
 
           if (!otherUserData) return;
 
-          const title = `${otherUserData.firstName} ${otherUserData.lastName}`;
-          const subtitle = chatData.latestMessageText || "New chat";
-          const image = otherUserData.profileImage;
+          if (isGroupChat) {
+            title = chatData.chatName;
+          } else {
+            title = `${otherUserData.firstName} ${otherUserData.lastName}`;
+            image = otherUserData.profileImage;
+          }
 
           return (
             <DataItem

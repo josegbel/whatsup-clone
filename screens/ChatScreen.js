@@ -5,9 +5,7 @@ import {
   ImageBackground,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
   FlatList,
-  Platform,
   ActivityIndicator,
   Image,
 } from "react-native";
@@ -76,9 +74,11 @@ const ChatScreen = (props) => {
     );
   };
 
+  const title = chatData.chatName || getChatTitleFromName();
+
   useEffect(() => {
     props.navigation.setOptions({
-      headerTitle: getChatTitleFromName(),
+      headerTitle: title,
     });
     setChatUsers(chatData.users);
   }, [chatUsers]);
@@ -163,133 +163,126 @@ const ChatScreen = (props) => {
 
   return (
     <SafeAreaView edges={["right", "left", "bottom"]} style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.screen}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={100}
-      >
-        <ImageBackground
-          source={backgroundImage}
-          style={styles.backgroundImage}
-        >
-          <PageContainer style={{ backgroundColor: "transparent" }}>
-            {!chatId && (
-              <Bubble text="This is a new chat. Say hi!" type="system" />
-            )}
+      <ImageBackground source={backgroundImage} style={styles.backgroundImage}>
+        <PageContainer style={{ backgroundColor: "transparent" }}>
+          {!chatId && (
+            <Bubble text="This is a new chat. Say hi!" type="system" />
+          )}
 
-            {errorBannerText !== "" && (
-              <Bubble text={errorBannerText} type="error" />
-            )}
+          {errorBannerText !== "" && (
+            <Bubble text={errorBannerText} type="error" />
+          )}
 
-            {chatId && (
-              <FlatList
-                data={storedMessages}
-                ref={(ref) => (flatList.current = ref)}
-                onContentSizeChange={() =>
-                  flatList.current.scrollToEnd({ animated: true })
-                }
-                onLayout={() =>
-                  flatList.current.scrollToEnd({ animated: false })
-                }
-                renderItem={(itemData) => {
-                  const message = itemData.item;
-                  return (
-                    <Bubble
-                      text={message.text}
-                      type={
-                        message.sentBy === userData.userId ? "sent" : "received"
-                      }
-                      messageId={message.key}
-                      userId={userData.userId}
-                      name={`${storedUsers[message.sentBy].firstName} ${storedUsers[message.sentBy].lastName}`}
-                      chatId={chatId}
-                      date={message.sentAt}
-                      setReply={() => setReplyingTo(message)}
-                      replyingTo={
-                        message.replyTo &&
-                        storedMessages.find((m) => m.key === message.replyTo)
-                      }
-                      imageUrl={message.imageUrl}
-                    />
-                  );
-                }}
-              />
-            )}
-          </PageContainer>
+          {chatId && (
+            <FlatList
+              data={storedMessages}
+              ref={(ref) => (flatList.current = ref)}
+              onContentSizeChange={() =>
+                flatList.current.scrollToEnd({ animated: true })
+              }
+              onLayout={() => flatList.current.scrollToEnd({ animated: false })}
+              renderItem={(itemData) => {
+                const message = itemData.item;
+                const isOwnMessage = message.sentBy === userData.userId;
+                const sender = message.sentBy && storedUsers[message.sentBy];
+                const name = sender && `${sender.firstName} ${sender.lastName}`;
 
-          {replyingTo && (
-            <ReplyTo
-              text={replyingTo.text}
-              user={storedUsers[replyingTo.sentBy]}
-              onCancel={() => setReplyingTo(null)}
+                return (
+                  <Bubble
+                    text={message.text}
+                    type={isOwnMessage ? "sent" : "received"}
+                    messageId={message.key}
+                    userId={userData.userId}
+                    name={
+                      !chatData.isGroupChat || isOwnMessage ? undefined : name
+                    }
+                    chatId={chatId}
+                    date={message.sentAt}
+                    setReply={() => setReplyingTo(message)}
+                    replyingTo={
+                      message.replyTo &&
+                      storedMessages.find((m) => m.key === message.replyTo)
+                    }
+                    imageUrl={message.imageUrl}
+                  />
+                );
+              }}
             />
           )}
-        </ImageBackground>
+        </PageContainer>
 
-        <View style={styles.inputContainer}>
-          <TouchableOpacity
-            style={styles.mediaButton}
-            onPress={() => pickImage()}
-          >
-            <Feather name="plus" size={24} color={colors.blue} />
+        {replyingTo && (
+          <ReplyTo
+            text={replyingTo.text}
+            user={storedUsers[replyingTo.sentBy]}
+            onCancel={() => setReplyingTo(null)}
+          />
+        )}
+      </ImageBackground>
+
+      <View style={styles.inputContainer}>
+        <TouchableOpacity
+          style={styles.mediaButton}
+          onPress={() => pickImage()}
+        >
+          <Feather name="plus" size={24} color={colors.blue} />
+        </TouchableOpacity>
+
+        <TextInput
+          style={styles.textbox}
+          value={messageText}
+          onChangeText={(text) => setMessageText(text)}
+          onSubmitEditing={sendMessage}
+        />
+
+        {messageText === "" && (
+          <TouchableOpacity style={styles.mediaButton} onPress={takePhoto}>
+            <Feather name="camera" size={24} color={colors.blue} />
           </TouchableOpacity>
+        )}
 
-          <TextInput
-            style={styles.textbox}
-            value={messageText}
-            onChangeText={(text) => setMessageText(text)}
-            onSubmitEditing={sendMessage}
-          />
+        {messageText !== "" && (
+          <TouchableOpacity
+            style={{ ...styles.mediaButton, ...styles.sendButton }}
+            onPress={sendMessage}
+          >
+            <Feather name="send" size={20} color={"white"} />
+          </TouchableOpacity>
+        )}
 
-          {messageText === "" && (
-            <TouchableOpacity style={styles.mediaButton} onPress={takePhoto}>
-              <Feather name="camera" size={24} color={colors.blue} />
-            </TouchableOpacity>
-          )}
-
-          {messageText !== "" && (
-            <TouchableOpacity
-              style={{ ...styles.mediaButton, ...styles.sendButton }}
-              onPress={sendMessage}
-            >
-              <Feather name="send" size={20} color={"white"} />
-            </TouchableOpacity>
-          )}
-
-          <AwesomeAlert
-            show={tempImageUri !== ""}
-            title="Send Image"
-            closeOnTouchOutside={true}
-            closeOnHardwareBackPress={true}
-            showCancelButton={true}
-            showConfirmButton={isImageUploading ? false : true}
-            confirmText="Send image"
-            cancelText="Cancel"
-            confirmButtonColor={colors.primary}
-            cancelButtonColor={colors.red}
-            titleStyle={styles.popupTitle}
-            onCancelPressed={() => {
-              setTempImageUri("");
-              setIsImageUploading(false);
-            }}
-            onConfirmPressed={uploadImage}
-            onDismiss={() => setTempImageUri("")}
-            customView={
-              <View>
-                {isImageUploading && (
-                  <ActivityIndicator size="small" color={colors.primary} />
-                )}
-                {tempImageUri !== "" && !isImageUploading && (
-                  <Image
-                    source={{ uri: tempImageUri }}
-                    style={{ width: 200, height: 200 }}
-                  />
-                )}
-              </View>
-            }
-          />
-        </View>
-      </KeyboardAvoidingView>
+        <AwesomeAlert
+          show={tempImageUri !== ""}
+          title="Send Image"
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={true}
+          showCancelButton={true}
+          showConfirmButton={isImageUploading ? false : true}
+          confirmText="Send image"
+          cancelText="Cancel"
+          confirmButtonColor={colors.primary}
+          cancelButtonColor={colors.red}
+          titleStyle={styles.popupTitle}
+          onCancelPressed={() => {
+            setTempImageUri("");
+            setIsImageUploading(false);
+          }}
+          onConfirmPressed={uploadImage}
+          onDismiss={() => setTempImageUri("")}
+          customView={
+            <View>
+              {isImageUploading && (
+                <ActivityIndicator size="small" color={colors.primary} />
+              )}
+              {tempImageUri !== "" && !isImageUploading && (
+                <Image
+                  source={{ uri: tempImageUri }}
+                  style={{ width: 200, height: 200 }}
+                />
+              )}
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -298,9 +291,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-  },
-  screen: {
-    flex: 1,
   },
   backgroundImage: {
     flex: 1,

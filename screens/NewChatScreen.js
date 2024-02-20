@@ -22,7 +22,7 @@ import ProfileImage from "../components/ProfileImage";
 const NewChatScreen = (props) => {
   const dispatch = useDispatch();
 
-  const isGroupChat = props.route.params ?? props.route.params.isGroupChat;
+  const isGroupChat = props.route.params.isGroupChat;
 
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState();
@@ -55,7 +55,12 @@ const NewChatScreen = (props) => {
                 disabled={isGroupChatDisabled}
                 color={isGroupChatDisabled ? colors.lightGrey : undefined}
                 title="Create"
-                onPress={() => {}}
+                onPress={() => {
+                  props.navigation.navigate("ChatList", {
+                    selectedUsers,
+                    chatName,
+                  });
+                }}
               />
             )}
           </HeaderButtons>

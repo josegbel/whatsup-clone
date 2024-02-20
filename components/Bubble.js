@@ -140,7 +140,7 @@ const Bubble = (props) => {
               chatId={chatId}
             />
           )}
-          {type === "reply" && <Text style={styles.name}>{name}</Text>}
+          {name && <Text style={styles.name}>{name}</Text>}
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
