@@ -24,7 +24,8 @@ import ReplyTo from "../components/ReplyTo";
 import { launchImagePicker, openCamera } from "../utils/imagePickerHelper";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { uploadImageAsync } from "../utils/imagePickerHelper";
-import { set } from "firebase/database";
+import { HeaderButtons, Item } from "react-navigation-header-buttons";
+import CustomHeaderButton from "../components/CustomHeaderButton";
 
 const backgroundImage = require("../assets/images/chatbg.jpeg");
 const ChatScreen = (props) => {
@@ -79,6 +80,25 @@ const ChatScreen = (props) => {
   useEffect(() => {
     props.navigation.setOptions({
       headerTitle: title,
+      headerRight: () => {
+        return (
+          <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
+            {chatId && (
+              <Item
+                title="Chat settings"
+                iconName="settings-outline"
+                onPress={() =>
+                  chatData.isGroupChat
+                    ? props.navigation.navigate("ChatInfo", { chatId })
+                    : props.navigation.navigate("Contact", {
+                        uid: chatUsers.find((uid) => uid !== userData.userId),
+                      })
+                }
+              />
+            )}
+          </HeaderButtons>
+        );
+      },
     });
     setChatUsers(chatData.users);
   }, [chatUsers]);

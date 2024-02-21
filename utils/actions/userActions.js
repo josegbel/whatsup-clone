@@ -26,6 +26,22 @@ export const getUserData = async (userId) => {
   }
 };
 
+export const getUserChats = async (userId) => {
+  try {
+    const app = getFirebaseApp();
+    const dbRef = ref(getDatabase(app));
+    const childRef = child(dbRef, `userChats/${userId}`);
+    const snapshot = await get(childRef);
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      console.log("No data available");
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const searchUsers = async (queryText) => {
   const searchTerm = queryText.toLowerCase();
 

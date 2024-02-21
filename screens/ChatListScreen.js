@@ -114,8 +114,6 @@ const ChatListScreen = (props) => {
           const subtitle = chatData.latestMessageText || "New chat";
           let image = "";
 
-          console.log("chatId passed from ChatListScreen: ", chatId);
-
           const otherUserId = chatData.users.find(
             (uid) => uid !== userData.userId,
           );
