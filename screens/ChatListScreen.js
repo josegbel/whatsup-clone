@@ -123,6 +123,7 @@ const ChatListScreen = (props) => {
 
           if (isGroupChat) {
             title = chatData.chatName;
+            image = chatData.chatImage;
           } else {
             title = `${otherUserData.firstName} ${otherUserData.lastName}`;
             image = otherUserData.profileImage;

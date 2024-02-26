@@ -17,6 +17,23 @@ export const validateString = (id, value) => {
   return validationResult && validationResult[id];
 };
 
+export const validateAlphanumericString = (id, value) => {
+  const constraints = {
+    presence: { allowEmpty: false },
+  };
+
+  if (value !== "") {
+    constraints.format = {
+      pattern: "^[^s][a-zA-Z0-9 ]*$",
+      message: "can only contain letters and numbers",
+    };
+  }
+
+  const validationResult = validate({ [id]: value }, { [id]: constraints });
+
+  return validationResult && validationResult[id];
+};
+
 export const validateEmail = (id, value) => {
   const constraints = {
     presence: { allowEmpty: false },

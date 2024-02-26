@@ -1,24 +1,41 @@
-import { StyleSheet, Text, View, TouchableWithoutFeedback } from "react-native";
 import React from "react";
-import ProfileImage from "./ProfileImage";
+import { StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import colors from "../constants/colors";
-import { Ionicons } from "@expo/vector-icons";
+import ProfileImage from "./ProfileImage";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
+
+const imageSize = 40;
 
 const DataItem = (props) => {
-  const { title, subtitle, image, type, isChecked } = props;
+  const { title, subTitle, image, type, isChecked, icon } = props;
 
   return (
     <TouchableWithoutFeedback onPress={props.onPress}>
       <View style={styles.container}>
-        <ProfileImage uri={image} size={40} />
+        {!icon && <ProfileImage uri={image} size={imageSize} />}
+
+        {icon && (
+          <View style={styles.leftIconContainer}>
+            <AntDesign name={icon} size={20} color={colors.blue} />
+          </View>
+        )}
 
         <View style={styles.textContainer}>
-          <Text numberOfLines={1} style={styles.title}>
+          <Text
+            numberOfLines={1}
+            style={{
+              ...styles.title,
+              color: type === "button" ? colors.blue : colors.textColor,
+            }}
+          >
             {title}
           </Text>
-          <Text numberOfLines={1} style={styles.subtitle}>
-            {subtitle}
-          </Text>
+
+          {subTitle && (
+            <Text numberOfLines={1} style={styles.subTitle}>
+              {subTitle}
+            </Text>
+          )}
         </View>
 
         {type === "checkbox" && (
@@ -50,7 +67,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     paddingVertical: 7,
-    borderBlockColor: colors.extraLightGrey,
+    borderBottomColor: colors.extraLightGrey,
     borderBottomWidth: 1,
     alignItems: "center",
     minHeight: 50,
@@ -64,21 +81,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 0.3,
   },
-  subtitle: {
-    fontFamily: "medium",
+  subTitle: {
+    fontFamily: "regular",
     color: colors.grey,
     letterSpacing: 0.3,
   },
   iconContainer: {
-    marginRight: 10,
-    borderRadius: 50,
     borderWidth: 1,
+    borderRadius: 50,
     borderColor: colors.lightGrey,
     backgroundColor: "white",
   },
   checkedStyle: {
     backgroundColor: colors.primary,
     borderColor: "transparent",
+  },
+  leftIconContainer: {
+    backgroundColor: colors.extraLightGrey,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    width: imageSize,
+    height: imageSize,
   },
 });
 
