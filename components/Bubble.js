@@ -95,6 +95,13 @@ const Bubble = (props) => {
       Container = TouchableWithoutFeedback;
       isUserMessage = true;
       break;
+    case "info":
+      textStyle.color = colors.textColor;
+      bubbleStyle.backgroundColor = colors.beige;
+      bubbleStyle.marginTop = 5;
+      textStyle.fontStyle = "italic";
+      bubbleStyle.alignItems = "center";
+      break;
     case "received":
       wrapperStyle.justifyContent = "flex-start";
       bubbleStyle.backgroundColor = "white";
@@ -140,7 +147,7 @@ const Bubble = (props) => {
               chatId={chatId}
             />
           )}
-          {name && <Text style={styles.name}>{name}</Text>}
+          {name && type !== "info" && <Text style={styles.name}>{name}</Text>}
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
@@ -151,7 +158,7 @@ const Bubble = (props) => {
               />
             )}
             {!imageUrl && <Text style={textStyle}>{text}</Text>}
-            {date && (
+            {date && type !== "info" && (
               <View style={styles.timeContainer}>
                 {isStarred && (
                   <FontAwesome

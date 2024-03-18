@@ -17,6 +17,7 @@ import colors from "../constants/colors";
 import { updateChatData } from "../utils/actions/chatActions";
 import { validateInput } from "../utils/actions/formActions";
 import { reducer } from "../utils/reducers/formReducers";
+import { removeUserFromChat } from "../utils/actions/chatActions";
 
 const ChatSettingsScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +68,20 @@ const ChatSettingsScreen = (props) => {
     return currentValues.chatName != chatData.chatName;
   };
 
+  const leaveChat = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      await removeUserFromChat(userData, userData, chatData);
+
+      props.navigation.popToTop();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, props.navigation]);
+
   return (
     <PageContainer>
       <PageTitle text="Chat Settings" />
@@ -106,7 +121,10 @@ const ChatSettingsScreen = (props) => {
                 subTitle={currentUser.about}
                 image={currentUser.profileImage}
                 type={uid !== userData.userId && "link"}
-                onPress={() => uid !== userData.userId && props.navigation.navigate("Contact", { uid })}
+                onPress={() =>
+                  uid !== userData.userId &&
+                  props.navigation.navigate("Contact", { uid, chatId })
+                }
               />
             );
           })}
@@ -127,6 +145,15 @@ const ChatSettingsScreen = (props) => {
           )
         )}
       </ScrollView>
+
+      {chatData.isGroupChat && (
+        <SubmitButton
+          title="Leave chat"
+          color={colors.red}
+          style={{ marginBottom: 20 }}
+          onPress={() => leaveChat()}
+        />
+      )}
     </PageContainer>
   );
 };

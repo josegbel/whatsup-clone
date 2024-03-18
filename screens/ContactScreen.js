@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
 import { useSelector } from "react-redux";
 import PageContainer from "../components/PageContainer";
 import ProfileImage from "../components/ProfileImage";
@@ -7,10 +7,18 @@ import PageTitle from "../components/PageTitle";
 import colors from "../constants/colors";
 import { getUserChats } from "../utils/actions/userActions";
 import DataItem from "../components/DataItem";
+import SubmitButton from "../components/SubmitButton";
+import { removeUserFromChat } from "../utils/actions/chatActions";
 
 const ContactScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const storedUsers = useSelector((state) => state.users.storedUsers);
   const storedChats = useSelector((state) => state.chats.chatsData);
+  const userData = useSelector((state) => state.auth.userData);
+
+  const chatId = props.route.params.chatId;
+  const chatData = chatId && storedChats[chatId];
 
   const currentUser = storedUsers[props.route.params.uid];
   const [commonChats, setCommonChats] = useState([]);
@@ -27,6 +35,20 @@ const ContactScreen = (props) => {
 
     getCommonUserChats(currentUser.userId);
   }, []);
+
+  const removeFromChat = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      await removeUserFromChat(userData, currentUser, chatData);
+
+      props.navigation.goBack();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, props.navigation]);
 
   return (
     <PageContainer>
@@ -66,6 +88,17 @@ const ContactScreen = (props) => {
             );
           })}
         </>
+      )}
+
+      {chatData && chatData.isGroupChat && isLoading ? (
+        <ActivityIndicator size="small" color={colors.primary} />
+      ) : (
+        <SubmitButton
+          title="Remove from chat"
+          color={colors.red}
+          onPress={removeFromChat}
+          style={{ marginTop: 20 }}
+        />
       )}
     </PageContainer>
   );

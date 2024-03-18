@@ -207,10 +207,19 @@ const ChatScreen = (props) => {
                 const sender = message.sentBy && storedUsers[message.sentBy];
                 const name = sender && `${sender.firstName} ${sender.lastName}`;
 
+                let messageType;
+                if (message.type === "info") {
+                  messageType = "info";
+                } else if (isOwnMessage) {
+                  messageType = "sent";
+                } else {
+                  messageType = "received";
+                }
+
                 return (
                   <Bubble
                     text={message.text}
-                    type={isOwnMessage ? "sent" : "received"}
+                    type={messageType}
                     messageId={message.key}
                     userId={userData.userId}
                     name={
