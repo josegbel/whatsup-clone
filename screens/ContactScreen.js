@@ -90,16 +90,18 @@ const ContactScreen = (props) => {
         </>
       )}
 
-      {chatData && chatData.isGroupChat && isLoading ? (
-        <ActivityIndicator size="small" color={colors.primary} />
-      ) : (
-        <SubmitButton
-          title="Remove from chat"
-          color={colors.red}
-          onPress={removeFromChat}
-          style={{ marginTop: 20 }}
-        />
-      )}
+      {chatData &&
+        chatData.isGroupChat &&
+        (isLoading ? (
+          <ActivityIndicator size="small" color={colors.primary} />
+        ) : (
+          <SubmitButton
+            title="Remove from chat"
+            color={colors.red}
+            onPress={removeFromChat}
+            style={{ marginTop: 20 }}
+          />
+        ))}
     </PageContainer>
   );
 };
